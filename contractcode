@@ -1,0 +1,45 @@
+solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract SubscriptionService {
+    address public owner;
+    uint256 public subscriptionFee;
+
+    mapping(address => bool) public subscriberStatus;
+
+    event SubscriptionRenewed(address indexed subscriber);
+
+    constructor(uint256 _fee) {
+        subscriptionFee = _fee;
+        owner = msg.sender;
+    }
+
+    modifier onlySubscriber() {
+        require(subscriberStatus[msg.sender], "Not an active subscriber");
+        _;
+    }
+
+    modifier activeSubscription() {
+        // Check if the subscription has expired (implementation required)
+        _;
+    }
+
+    function subscribe() public payable {
+        require(msg.value == subscriptionFee, "Incorrect fee amount");
+        require(!subscriberStatus[msg.sender], "Already subscribed");
+        subscriberStatus[msg.sender] = true;
+        emit SubscriptionRenewed(msg.sender);
+    }
+
+    function renewSubscription() public payable onlySubscriber {
+        require(msg.value == subscriptionFee, "Incorrect fee amount");
+        // Extend the subscription period logic (implementation required)
+        emit SubscriptionRenewed(msg.sender);
+    }
+
+    function cancelSubscription() public onlySubscriber {
+        subscriberStatus[msg.sender] = false;
+        // Additional logic for any refunds or cleanup (implementation required)
+    }
+}
